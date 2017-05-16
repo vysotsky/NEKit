@@ -11,8 +11,9 @@ public protocol DNSResolverDelegate: class {
 }
 
 open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
-    let socket: NWUDPSocket
+    var socket: NWUDPSocket
     public weak var delegate: DNSResolverDelegate?
+    public var didFail: (() -> (IPAddress, NEKit.Port)?)?
 
     public init(address: IPAddress, port: Port) {
         socket = NWUDPSocket(host: address.presentation, port: Int(port.value))!
@@ -32,6 +33,9 @@ open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
     }
     
     public func didCancel(socket: NWUDPSocket) {
-        
+        if let (address, port) = didFail?() {
+            self.socket = NWUDPSocket(host: address.presentation, port: Int(port.value))!
+            self.socket.delegate = self
+        }
     }
 }
