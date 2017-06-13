@@ -34,6 +34,7 @@ open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
     
     public func didCancel(socket: NWUDPSocket) {
         if let (address, port) = didFail?() {
+            self.socket.disconnect()
             self.socket = NWUDPSocket(host: address.presentation, port: Int(port.value))!
             self.socket.delegate = self
         }
