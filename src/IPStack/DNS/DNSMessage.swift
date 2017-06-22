@@ -256,12 +256,15 @@ open class DNSQuery {
     open let type: DNSType
     open let klass: DNSClass
     let nameBytesLength: Int
+    
+    let originalName: String?
 
-    init(name: String, type: DNSType = .a, klass: DNSClass = .internet) {
+    init(name: String, type: DNSType = .a, klass: DNSClass = .internet, originalName: String? = nil) {
         self.name = name.trimmingCharacters(in: CharacterSet(charactersIn: "."))
         self.type = type
         self.klass = klass
         self.nameBytesLength = name.utf8.count + 2
+        self.originalName = originalName
     }
 
     init?(payload: Data, offset: Int, base: Int = 0) {
@@ -284,6 +287,7 @@ open class DNSQuery {
             }
             self.klass = klass
             
+            self.originalName = nil
         } catch _ {
             return nil
         }

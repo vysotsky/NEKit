@@ -252,6 +252,38 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
                 DDLogVerbose("Do not find the corresponding DNS session for the response.")
                 return
             }
+            
+            var needsBuild = false
+            for query in session.requestMessage.queries {
+                if let originalName = query.originalName {
+                    DDLogInfo("Query was replaced \(originalName)")
+                    for (idx, answer) in message.answers.enumerated() {
+                        if answer.name == query.name, let address = answer.ipv4Address {
+                            let newAnswer = DNSResource.ARecord(originalName, TTL: answer.TTL, address: address)
+                            message.answers[idx] = newAnswer
+                            
+                            needsBuild = true
+                        }
+                    }
+                    
+                    for (idx, responseQuery) in message.queries.enumerated() {
+                        if responseQuery.name == query.name {
+                            let newResponseQuery = DNSQuery(name: originalName, type: responseQuery.type, klass: responseQuery.klass)
+                            message.queries[idx] = newResponseQuery
+                            
+                            needsBuild = true
+                        }
+                    }
+                }
+            }
+            
+            if needsBuild {
+                if message.buildMessage() {
+                    DDLogInfo("Rewrote response payload (ans)")
+                } else {
+                    DDLogInfo("Problem writing response payload (ans)")
+                }
+            }
 
             session.realResponseMessage = message
 
