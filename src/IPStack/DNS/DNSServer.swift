@@ -256,7 +256,7 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
             var needsBuild = false
             for query in session.requestMessage.queries {
                 if let originalName = query.originalName {
-                    DDLogInfo("Query was replaced \(originalName)")
+                    DDLogDebug("DNS Response: Response for \(originalName) replaced by \(query.name)")
                     for (idx, answer) in message.answers.enumerated() {
                         if answer.name == query.name, let address = answer.ipv4Address {
                             let newAnswer = DNSResource.ARecord(originalName, TTL: answer.TTL, address: address)
@@ -279,9 +279,9 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
             
             if needsBuild {
                 if message.buildMessage() {
-                    DDLogInfo("Rewrote response payload (ans)")
+                    DDLogDebug("DNS Response: Rewrote response payload")
                 } else {
-                    DDLogInfo("Problem writing response payload (ans)")
+                    DDLogDebug("DNS Response: Problem writing response payload")
                 }
             }
 

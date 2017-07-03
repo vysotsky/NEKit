@@ -34,6 +34,8 @@ open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
                         let newQuery = DNSQuery(name: replacement, type: query.type, klass: query.klass, originalName: origonal)
                         session.requestMessage.queries[idx] = newQuery
                         
+                        DDLogDebug("DNS Query: Replaced query for \(origonal) with \(replacement)")
+                        
                         needsBuild = true
                     }
                 }
@@ -41,9 +43,9 @@ open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
             
             if needsBuild {
                 if session.requestMessage.buildMessage() {
-                    DDLogInfo("Rewrote payload for request")
+                    DDLogDebug("DNS Query: Rewrote payload for request")
                 } else {
-                    DDLogInfo("Problem writing payload for request")
+                    DDLogDebug("DNS Query: Problem writing payload for request")
                 }
             }
         }
