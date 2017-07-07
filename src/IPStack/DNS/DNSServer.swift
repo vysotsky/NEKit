@@ -258,8 +258,8 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
                 if let originalName = query.originalName {
                     DDLogDebug("DNS Response: Response for \(originalName) replaced by \(query.name)")
                     for (idx, answer) in message.answers.enumerated() {
-                        if answer.name == query.name, let address = answer.ipv4Address {
-                            let newAnswer = DNSResource.ARecord(originalName, TTL: answer.TTL, address: address)
+                        if answer.name == query.name {
+                            let newAnswer = DNSResource(name: originalName, type: answer.type, klass: answer.klass, TTL: answer.TTL, data: answer.data)
                             message.answers[idx] = newAnswer
                             
                             needsBuild = true
