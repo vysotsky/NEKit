@@ -12,18 +12,28 @@ public protocol DNSResolverDelegate: class {
 }
 
 open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
-    var socket: NWUDPSocket
+    var socket: NWUDPSocket?
     public weak var delegate: DNSResolverDelegate?
     public var didFail: (() -> (IPAddress, NEKit.Port)?)?
     
     let replacements: [String: String]?
+    
+    var address: IPAddress
+    var port: Port
 
     public init(address: IPAddress, port: Port, replacements: [String: String]? = nil) {
         self.replacements = replacements
-        socket = NWUDPSocket(host: address.presentation, port: Int(port.value))!
-        socket.delegate = self
+        self.address = address
+        self.port = port
+        self.createSocket()
     }
 
+    private func createSocket() {
+        socket?.disconnect()
+        socket = NWUDPSocket(host: address.presentation, port: Int(port.value))
+        socket?.delegate = self
+    }
+    
     public func resolve(session: DNSSession) {
         if let replacements = replacements {
             var needsBuild = false
@@ -50,11 +60,14 @@ open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
             }
         }
         
-        socket.write(data: session.requestMessage.payload)
+        if socket == nil {
+            createSocket()
+        }
+        socket?.write(data: session.requestMessage.payload)
     }
 
     public func stop() {
-        socket.disconnect()
+        socket?.disconnect()
     }
 
     public func didReceive(data: Data, from: NWUDPSocket) {
@@ -63,9 +76,9 @@ open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
     
     public func didCancel(socket: NWUDPSocket) {
         if let (address, port) = didFail?() {
-            self.socket.disconnect()
-            self.socket = NWUDPSocket(host: address.presentation, port: Int(port.value))!
-            self.socket.delegate = self
+            self.address = address
+            self.port = port
+            self.createSocket()
         }
     }
 }
