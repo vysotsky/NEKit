@@ -1,6 +1,5 @@
 github "JayZhao/CocoaAsyncSocket" "master"
 github "CocoaLumberjack/CocoaLumberjack" ~> 3.0.0
 github "zhuhaow/Sodium-framework" "master"
-github "SwiftyJSON/SwiftyJSON" ~> 3.1
 github "JayZhao/tun2socks" "master"
 github "facebook/KVOController" ~> 1.2
