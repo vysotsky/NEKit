@@ -11,17 +11,17 @@ open class Checksum {
         return toChecksum(cs) == 0
     }
 
-    open static func computeChecksumUnfold(_ data: Data, from start: Int = 0, to end: Int? = nil, withPseudoHeaderChecksum initChecksum: UInt32 = 0) -> UInt32 {
+    open static func computeChecksumUnfold(_ data: Data, from start: Int = 0, to end: Int? = nil, withPseudoHeaderChecksum initChecksum: UInt32 = 0) -> UInt64 {
         let scanner = BinaryDataScanner(data: data, littleEndian: true)
         scanner.skip(to: start)
-        var result: UInt32 = initChecksum
+        var result = UInt64(initChecksum)
         var end = end
         if end == nil {
             end = data.count
         }
         while scanner.position + 2 <= end! {
             let value = (try? scanner.read16()) ?? 0
-            result += UInt32(value)
+            result += UInt64(value)
         }
 
         if scanner.position != end {
@@ -29,12 +29,12 @@ open class Checksum {
             // Intel and ARM are both litten endian
             // so just add it
             let value = (try? scanner.readByte()) ?? 0
-            result += UInt32(value)
+            result += UInt64(value)
         }
         return result
     }
 
-    open static func toChecksum(_ checksum: UInt32) -> UInt16 {
+    open static func toChecksum(_ checksum: UInt64) -> UInt16 {
         var result = checksum
         while (result) >> 16 != 0 {
             result = result >> 16 + result & 0xFFFF
