@@ -27,6 +27,6 @@ excluded:
 - tun2socks
 - test
 
-force_unwrapping: error
-force_cast: error
-force_try: error
+force_unwrapping: warning
+force_cast: warning
+force_try: warning
