@@ -1,10 +1,14 @@
+opt_rules:
+- force_unwrap
+- force_cast
 disabled_rules:
 - line_length
 - type_name
 - variable_name
 - cyclomatic_complexity
 - nesting
+- shorthand_operator
 excluded:
-  - Carthage
-  - tun2socks
-  - test
+- Carthage
+- tun2socks
+- test
