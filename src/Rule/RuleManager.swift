@@ -60,9 +60,9 @@ open class RuleManager {
      - returns: The matched configured adapter.
      */
     func match(_ session: ConnectSession) -> AdapterFactory! {
-        if session.matchedRule != nil {
-            observer?.signal(.ruleMatched(session, rule: session.matchedRule!))
-            return session.matchedRule!.match(session)
+        if let matchedRule = session.matchedRule {
+            observer?.signal(.ruleMatched(session, rule: matchedRule))
+            return matchedRule.match(session)
         }
 
         for rule in rules {

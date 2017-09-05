@@ -120,11 +120,11 @@ public class IPAddress: CustomStringConvertible, Hashable, Comparable {
     }
 
     public var dataInNetworkOrder: Data {
-        var outputData: Data? = nil
+        var outputData: Data!
         withBytesInNetworkOrder {
             outputData = Data($0)
         }
-        return outputData!
+        return outputData
     }
 
     public var UInt32InNetworkOrder: UInt32? {

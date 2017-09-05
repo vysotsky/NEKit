@@ -77,7 +77,11 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
 
         RuleManager.currentManager.matchDNS(session, type: .domain)
 
-        switch session.matchResult! {
+        guard let matchResult = session.matchResult else {
+            DDLogError("The rule match result should never be nil")
+            return
+        }
+        switch matchResult {
         case .fake:
             guard setUpFakeIP(session) else {
                 // failed to set up a fake IP, return the result directly
@@ -201,7 +205,7 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
     }
 
     fileprivate func shouldMatch(_ session: DNSSession) -> Bool {
-        return matchedType.contains(session.requestMessage.type!)
+        return session.requestMessage.type.map({matchedType.contains($0)}) ?? false
     }
 
     func isFakeIP(_ ipAddress: IPAddress) -> Bool {
@@ -292,8 +296,13 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
             if session.matchResult != .fake && session.matchResult != .real {
                 RuleManager.currentManager.matchDNS(session, type: .ip)
             }
-
-            switch session.matchResult! {
+            
+            guard let matchResult = session.matchResult else {
+                DDLogError("The rule match result should never be nil")
+                return
+            }
+            
+            switch matchResult {
             case .fake:
                 if !self.setUpFakeIP(session) {
                     // return real response

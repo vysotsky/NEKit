@@ -7,8 +7,8 @@ enum ChangeType {
 public class IPMutablePacket {
     // Support only IPv4 for now
 
-    let version: IPVersion
-    let proto: TransportType
+    let version: IPVersion?
+    let proto: TransportType?
     let IPHeaderLength: Int
     var sourceAddress: IPv4Address {
         get {
@@ -31,10 +31,10 @@ public class IPMutablePacket {
 
     public init(payload: NSData) {
         let vl = UnsafePointer<UInt8>(payload.bytes).memory
-        version = IPVersion(rawValue: vl >> 4)!
+        version = IPVersion(rawValue: vl >> 4)
         IPHeaderLength = Int(vl & 0x0F) * 4
         let p = UnsafePointer<UInt8>(payload.bytes.advancedBy(9)).memory
-        proto = TransportType(rawValue: p)!
+        proto = TransportType(rawValue: p)
         self.payload = NSMutableData(data: payload)
     }
 

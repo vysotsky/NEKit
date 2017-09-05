@@ -241,7 +241,12 @@ open class IPPacket {
                 return nil
             }
             
-            switch transportProtocol! {
+            guard let transportProtocol = transportProtocol else {
+                DDLogError("No transportProtocol provided")
+                return nil
+            }
+            
+            switch transportProtocol {
             case .udp:
                 guard let parser = UDPProtocolParser(packetData: packetData, offset: Int(headerLength)) else {
                     return nil
@@ -326,11 +331,8 @@ open class IPPacket {
     }
 
     func setPayloadWithData(_ data: Data, at: Int, length: Int? = nil, from: Int = 0) {
-        var length = length
-        if length == nil {
-            length = data.count - from
-        }
-        packetData.replaceSubrange(at..<at+length!, with: data)
+        let length: Int = length ?? data.count - from
+        packetData.replaceSubrange(at..<at+length, with: data)
     }
 
     func resetPayloadAt(_ at: Int, length: Int) {

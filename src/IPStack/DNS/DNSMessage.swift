@@ -88,7 +88,7 @@ open class DNSMessage {
             for _ in 0..<queryCount {
                 if let query = DNSQuery(payload: payload, offset: scanner.position, base: 0) {
                     queries.append(query)
-                    scanner.advance(by: queries.last!.bytesLength)
+                    scanner.advance(by: query.bytesLength)
                 }
                 else {
                     return nil
@@ -98,7 +98,7 @@ open class DNSMessage {
             for _ in 0..<answerCount {
                 if let resource = DNSResource(payload: payload, offset: scanner.position, base: 0) {
                     answers.append(resource)
-                    scanner.advance(by: answers.last!.bytesLength)
+                    scanner.advance(by: resource.bytesLength)
                 }
                 else {
                     return nil
@@ -108,7 +108,7 @@ open class DNSMessage {
             for _ in 0..<nameserverCount {
                 if let resource = DNSResource(payload: payload, offset: scanner.position, base: 0) {
                     nameservers.append(resource)
-                    scanner.advance(by: nameservers.last!.bytesLength)
+                    scanner.advance(by: resource.bytesLength)
                 }
                 else {
                     return nil
@@ -118,7 +118,7 @@ open class DNSMessage {
             for _ in 0..<addtionalCount {
                 if let resource = DNSResource(payload: payload, offset: scanner.position, base: 0) {
                     addtionals.append(resource)
-                    scanner.advance(by: addtionals.last!.bytesLength)
+                    scanner.advance(by: resource.bytesLength)
                 }
                 else {
                     return nil
