@@ -268,12 +268,18 @@ open class DNSQuery {
     }
 
     init?(payload: Data, offset: Int, base: Int = 0) {
-        (self.name, self.nameBytesLength) = DNSNameConverter.getNamefromData(payload, offset: offset, base: base)
-
+        var name: String?
+        (name, self.nameBytesLength) = DNSNameConverter.getNamefromData(payload, offset: offset, base: base)
+        
         let scanner = BinaryDataScanner(data: payload, littleEndian: false)
         scanner.skip(to: offset + self.nameBytesLength)
-
+        
         do {
+            guard let name = name else {
+                DDLogError("Received DNS packet with unknown name.")
+                return nil
+            }
+            self.name = name
             
             guard let type = DNSType(rawValue: try scanner.read16()) else {
                 DDLogError("Received DNS packet with unknown type.")
@@ -292,6 +298,7 @@ open class DNSQuery {
             return nil
         }
     }
+
 
     var bytesLength: Int {
         return nameBytesLength + 4
@@ -323,12 +330,18 @@ open class DNSResource {
     }
 
     init?(payload: Data, offset: Int, base: Int = 0) {
-        (self.name, self.nameBytesLength) = DNSNameConverter.getNamefromData(payload, offset: offset, base: base)
-
+        var name: String?
+        (name, self.nameBytesLength) = DNSNameConverter.getNamefromData(payload, offset: offset, base: base)
+        
         let scanner = BinaryDataScanner(data: payload, littleEndian: false)
         scanner.skip(to: offset + self.nameBytesLength)
         
         do {
+            guard let name = name else {
+                DDLogError("Received DNS packet with unknown name.")
+                return nil
+            }
+            self.name = name
             
             guard let type = DNSType(rawValue: try scanner.read16()) else {
                 DDLogError("Received DNS packet with unknown type.")
@@ -348,7 +361,6 @@ open class DNSResource {
             return nil
         }
     }
-
     var bytesLength: Int {
         return nameBytesLength + 10 + Int(dataLength)
     }
@@ -386,10 +398,10 @@ class DNSNameConverter {
         return true
     }
 
-    static func getNamefromData(_ data: Data, offset: Int, base: Int = 0) -> (String, Int) {
+    static func getNamefromData(_ data: Data, offset: Int, base: Int = 0) -> (String?, Int) {
         let scanner = BinaryDataScanner(data: data, littleEndian: false)
         scanner.skip(to: offset)
-
+        
         var len: UInt8 = 0
         var name = ""
         var currentReadBytes = 0
@@ -409,27 +421,29 @@ class DNSNameConverter {
             } else {
                 scanner.advance(by: -2)
             }
-
+            
             len = (try? scanner.readByte()) ?? 0
             currentReadBytes += 1
             if len == 0 {
                 break
             }
-
+            
             currentReadBytes += Int(len)
-
-            guard let label = String(bytes: scanner.data.subdata(in: scanner.position..<scanner.position+Int(len)), encoding: .utf8) else {
-                return ("", currentReadBytes)
+            
+            let range: Range<Data.Index> = scanner.position..<scanner.position+Int(len)
+            guard range.upperBound <= data.indices.upperBound,
+                let label = String(bytes: scanner.data.subdata(in: range), encoding: .utf8) else {
+                    return (nil, currentReadBytes)
             }
             // this is not efficient, but won't take much time, so maybe I'll optimize it later
             name = name.appendingFormat(".%@", label)
             scanner.advance(by: Int(len))
         } while true
-
+        
         if !jumped {
             nameBytesLength = currentReadBytes
         }
-
+        
         return (name.trimmingCharacters(in: CharacterSet(charactersIn: ".")), nameBytesLength)
     }
 }
