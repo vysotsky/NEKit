@@ -48,8 +48,8 @@ func trim(_ s: String) -> String {
 }
 
 func trim(_ s: String?) -> String? {
-    if let s = s {
-        return trim(s) as String
+    if let s = s as String {
+        return trim(s)
     }
     return nil
 }
