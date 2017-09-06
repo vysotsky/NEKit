@@ -61,7 +61,7 @@ public class HTTPAdapter: AdapterSocket {
     override public func didConnectWith(socket: RawTCPSocketProtocol) {
         super.didConnectWith(socket: socket)
 
-        guard let url = URL(string: "\(session.host):\(session.port)") else {
+        guard let session = session, let url = URL(string: "\(session.host):\(session.port)") else {
             observer?.signal(.errorOccured(HTTPAdapterError.invalidURL, on: self))
             disconnect()
             return

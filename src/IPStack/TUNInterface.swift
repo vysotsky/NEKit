@@ -21,7 +21,7 @@ open class TUNInterface {
         }
     }
     
-    private var tokenForWaterLevel:NSObjectProtocol!
+    private var tokenForWaterLevel:NSObjectProtocol?
     private var isWaterLevelOK = true
     
     fileprivate weak var packetFlow: NEPacketTunnelFlow?
@@ -47,7 +47,9 @@ open class TUNInterface {
     }
     
     deinit {
-        NotificationCenter.default.removeObserver(tokenForWaterLevel)
+        if let tokenForWaterLevel = tokenForWaterLevel {
+            NotificationCenter.default.removeObserver(tokenForWaterLevel)
+        }
     }
     
     /**

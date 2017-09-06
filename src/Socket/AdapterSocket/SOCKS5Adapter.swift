@@ -53,6 +53,10 @@ public class SOCKS5Adapter: AdapterSocket {
 
     public override func didRead(data: Data, from socket: RawTCPSocketProtocol) {
         super.didRead(data: data, from: socket)
+        
+        guard let session = session else {
+            return
+        }
 
         switch internalStatus {
         case .readingMethodResponse:
