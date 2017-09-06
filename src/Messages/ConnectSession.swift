@@ -105,7 +105,10 @@ public final class ConnectSession {
             return true
         }
         
-        let address = IPAddress(fromString: requestedHost)!
+        guard let address = IPAddress(fromString: requestedHost) else {
+            return false
+        }
+        
         guard dnsServer.isFakeIP(address) else {
             return true
         }

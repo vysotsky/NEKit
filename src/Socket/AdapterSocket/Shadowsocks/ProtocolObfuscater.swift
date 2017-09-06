@@ -353,7 +353,9 @@ extension ShadowsocksAdapter {
                         let length = Int(ptr.pointee.byteSwapped)
                         self.buffer.skip(2)
                         if self.buffer.left >= length {
-                            unpackedData.append(self.buffer.get(length: length)!)
+                            if let data = self.buffer.get(length: length) {
+                                unpackedData.append(data)
+                            }
                             return true
                         } else {
                             self.buffer.setBack(length: 5)

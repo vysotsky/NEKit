@@ -30,7 +30,7 @@ open class CCCrypto: StreamCryptoProtocol {
         }
     }
     
-    let cryptor: CCCryptorRef
+    let cryptor: CCCryptorRef?
     
     public init(operation: CryptoOperation, mode: Mode, algorithm: Algorithm, initialVector: Data?, key: Data) {
         
@@ -45,7 +45,7 @@ open class CCCrypto: StreamCryptoProtocol {
                 CCCryptorCreateWithMode(operation.toCCOperation(), mode.toCCMode(), algorithm.toCCAlgorithm(), CCPadding(ccNoPadding), nil, k, key.count, nil, 0, 0, 0, cryptor)
             }
         }
-        self.cryptor = cryptor.pointee!
+        self.cryptor = cryptor.pointee
     }
     
     open func update( _ data: inout Data) {

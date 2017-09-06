@@ -63,9 +63,9 @@ open class HTTPHeader {
 
             if let _url = Foundation.URL(string: path) {
                 foundationURL = _url
-                if foundationURL!.host != nil {
-                    host = foundationURL!.host!
-                    port = foundationURL!.port ?? 80
+                if let host = foundationURL?.host {
+                    self.host = host
+                    port = foundationURL?.port ?? 80
                     resolved = true
                 }
             } else {
@@ -73,9 +73,9 @@ open class HTTPHeader {
                     throw HTTPHeaderError.invalidURL
                 }
                 homemadeURL = _url
-                if homemadeURL!.host != nil {
-                    host = homemadeURL!.host!
-                    port = homemadeURL!.port ?? 80
+                if let host = homemadeURL?.host {
+                    self.host = host
+                    port = homemadeURL?.port ?? 80
                     resolved = true
                 }
             }

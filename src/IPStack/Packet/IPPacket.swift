@@ -241,7 +241,12 @@ open class IPPacket {
                 return nil
             }
             
-            switch transportProtocol! {
+            guard let transportProtocol = transportProtocol else {
+                DDLogError("No transportProtocol provided")
+                return nil
+            }
+            
+            switch transportProtocol {
             case .udp:
                 guard let parser = UDPProtocolParser(packetData: packetData, offset: Int(headerLength)) else {
                     return nil
@@ -258,11 +263,11 @@ open class IPPacket {
 
     func computePseudoHeaderChecksum() -> UInt32 {
         var result: UInt32 = 0
-        if let address = sourceAddress {
-            result += address.UInt32InNetworkOrder! >> 16 + address.UInt32InNetworkOrder! & 0xFFFF
+        if let address = sourceAddress, let inNetworkOrder = address.UInt32InNetworkOrder {
+            result += inNetworkOrder >> 16 + inNetworkOrder & 0xFFFF
         }
-        if let address = destinationAddress {
-            result += address.UInt32InNetworkOrder! >> 16 + address.UInt32InNetworkOrder! & 0xFFFF
+        if let address = destinationAddress, let inNetworkOrder = address.UInt32InNetworkOrder  {
+            result += inNetworkOrder >> 16 + inNetworkOrder & 0xFFFF
         }
         result += UInt32(transportProtocol.rawValue) << 8
         result += CFSwapInt32(UInt32(protocolParser.bytesLength))
@@ -282,8 +287,12 @@ open class IPPacket {
         setPayloadWithUInt8(transportProtocol.rawValue, at: 9)
         // clear checksum bytes
         resetPayloadAt(10, length: 2)
-        setPayloadWithUInt32(sourceAddress.UInt32InNetworkOrder!, at: 12, swap: false)
-        setPayloadWithUInt32(destinationAddress.UInt32InNetworkOrder!, at: 16, swap: false)
+        if let inNetworkOrder = sourceAddress.UInt32InNetworkOrder {
+            setPayloadWithUInt32(inNetworkOrder, at: 12, swap: false)
+        }
+        if let inNetworkOrder = destinationAddress.UInt32InNetworkOrder {
+            setPayloadWithUInt32(inNetworkOrder, at: 16, swap: false)
+        }
 
         // let TCP or UDP packet build
         protocolParser.packetData = packetData
@@ -326,11 +335,8 @@ open class IPPacket {
     }
 
     func setPayloadWithData(_ data: Data, at: Int, length: Int? = nil, from: Int = 0) {
-        var length = length
-        if length == nil {
-            length = data.count - from
-        }
-        packetData.replaceSubrange(at..<at+length!, with: data)
+        let length: Int = length ?? data.count - from
+        packetData.replaceSubrange(at..<at+length, with: data)
     }
 
     func resetPayloadAt(_ at: Int, length: Int) {

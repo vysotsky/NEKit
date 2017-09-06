@@ -66,7 +66,7 @@ extension ShadowsocksAdapter {
                 buffer.append(data: data)
                 readIV = buffer.get(length: ivLength)
                 guard readIV != nil else {
-                    try inputStreamProcessor!.input(data: Data())
+                    try inputStreamProcessor?.input(data: Data())
                     return
                 }
 
@@ -75,21 +75,24 @@ extension ShadowsocksAdapter {
             }
 
             decrypt(data: &data)
-            try inputStreamProcessor!.input(data: data)
+            try inputStreamProcessor?.input(data: data)
         }
 
         public func output(data: Data) {
+            guard let outputStreamProcessor = outputStreamProcessor else {
+                return
+            }
             var data = data
             encrypt(data: &data)
             if sendKey {
-                return outputStreamProcessor!.output(data: data)
+                return outputStreamProcessor.output(data: data)
             } else {
                 sendKey = true
                 var out = Data(capacity: data.count + writeIV.count)
                 out.append(writeIV)
                 out.append(data)
 
-                return outputStreamProcessor!.output(data: out)
+                return outputStreamProcessor.output(data: out)
             }
         }
 

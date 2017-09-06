@@ -117,7 +117,6 @@ public class SpeedAdapter: AdapterSocket, SocketDelegate {
         if let startTime = self.startTime {
             latency = CACurrentMediaTime() - startTime
         }
-        
         // We only have ss
         let ssAdapter = adapterSocket as! ShadowsocksAdapter
             

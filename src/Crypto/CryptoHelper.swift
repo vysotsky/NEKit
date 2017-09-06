@@ -11,11 +11,11 @@ public struct CryptoHelper {
         ]
 
     public static func getKeyLength(_ methodType: CryptoAlgorithm) -> Int {
-        return infoDictionary[methodType]!.0
+        return infoDictionary[methodType]?.0 ?? 0
     }
 
     public static func getIVLength(_ methodType: CryptoAlgorithm) -> Int {
-        return infoDictionary[methodType]!.1
+        return infoDictionary[methodType]?.1 ?? 0
     }
 
     public static func getIV(_ methodType: CryptoAlgorithm) -> Data {

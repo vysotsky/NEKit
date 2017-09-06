@@ -39,6 +39,6 @@ public struct HTTPAuthentication {
      - returns: The encoded authentication string.
      */
     public func authString() -> String {
-        return "Basic \(encoding()!)"
+        return "Basic \(String(describing: encoding()))"
     }
 }

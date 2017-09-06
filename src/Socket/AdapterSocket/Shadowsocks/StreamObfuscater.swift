@@ -66,15 +66,15 @@ extension ShadowsocksAdapter {
             }
 
             public override func input(data: Data) throws {
-                inputStreamProcessor!.input(data: data)
+                inputStreamProcessor?.input(data: data)
             }
 
             public override func output(data: Data) {
                 if requestSend {
-                    return outputStreamProcessor!.output(data: data)
+                    outputStreamProcessor?.output(data: data)
                 } else {
                     requestSend = true
-                    return outputStreamProcessor!.output(data: requestData(withData: data))
+                    outputStreamProcessor?.output(data: requestData(withData: data))
                 }
             }
         }

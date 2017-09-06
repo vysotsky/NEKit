@@ -77,7 +77,11 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
 
         RuleManager.currentManager.matchDNS(session, type: .domain)
 
-        switch session.matchResult! {
+        guard let matchResult = session.matchResult else {
+            DDLogError("The rule match result should never be nil")
+            return
+        }
+        switch matchResult {
         case .fake:
             guard setUpFakeIP(session) else {
                 // failed to set up a fake IP, return the result directly
@@ -173,7 +177,10 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
                 response.messageType = .response
                 response.recursionAvailable = true
                 // since we only support ipv4 as of now, it must be an answer of type A
-                response.answers.append(DNSResource.ARecord(session.requestMessage.queries[0].name, TTL: UInt32(Opt.DNSFakeIPTTL), address: session.fakeIP!))
+                if let name = session.requestMessage.queries.first?.name,
+                    let address = session.fakeIP {
+                    response.answers.append(DNSResource.ARecord(name, TTL: UInt32(Opt.DNSFakeIPTTL), address: address))
+                }
                 session.expireAt = Date().addingTimeInterval(Double(Opt.DNSFakeIPTTL))
                 guard response.buildMessage() else {
                     DDLogError("Failed to build DNS response.")
@@ -201,7 +208,7 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
     }
 
     fileprivate func shouldMatch(_ session: DNSSession) -> Bool {
-        return matchedType.contains(session.requestMessage.type!)
+        return session.requestMessage.type.map({matchedType.contains($0)}) ?? false
     }
 
     func isFakeIP(_ ipAddress: IPAddress) -> Bool {
@@ -292,8 +299,13 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
             if session.matchResult != .fake && session.matchResult != .real {
                 RuleManager.currentManager.matchDNS(session, type: .ip)
             }
-
-            switch session.matchResult! {
+            
+            guard let matchResult = session.matchResult else {
+                DDLogError("The rule match result should never be nil")
+                return
+            }
+            
+            switch matchResult {
             case .fake:
                 if !self.setUpFakeIP(session) {
                     // return real response

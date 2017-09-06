@@ -157,10 +157,10 @@ public class Tunnel: NSObject, SocketDelegate {
         }
         
         let manager = RuleManager.currentManager
-        let factory = manager.match(session)!
-        adapterSocket = factory.getAdapterFor(session: session)
-        adapterSocket!.delegate = self
-        adapterSocket!.openSocketWith(session: session)
+        let factory = manager.match(session)
+        adapterSocket = factory?.getAdapterFor(session: session)
+        adapterSocket?.delegate = self
+        adapterSocket?.openSocketWith(session: session)
     }
     
     public func didBecomeReadyToForwardWith(socket: SocketProtocol) {
@@ -198,7 +198,7 @@ public class Tunnel: NSObject, SocketDelegate {
             guard !isCancelled else {
                 return
             }
-            adapterSocket!.write(data: data)
+            adapterSocket?.write(data: data)
         } else if let socket = socket as? AdapterSocket {
             observer?.signal(.adapterSocketReadData(data, from: socket, on: self))
             
@@ -243,7 +243,9 @@ public class Tunnel: NSObject, SocketDelegate {
             return
         }
         
-        observer?.signal(.updatingAdapterSocket(from: adapterSocket!, to: newAdapter, on: self))
+        if let adapterSocket = adapterSocket {
+            observer?.signal(.updatingAdapterSocket(from: adapterSocket, to: newAdapter, on: self))
+        }
         
         adapterSocket = newAdapter
         adapterSocket?.delegate = self

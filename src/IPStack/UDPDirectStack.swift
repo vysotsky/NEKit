@@ -74,20 +74,21 @@ public class UDPDirectStack: IPStackProtocol, NWUDPSocketDelegate {
         }
 
         // swiftlint:disable:next force_cast
-        let payload = (packet.protocolParser as! UDPProtocolParser).payload
-        socket.write(data: payload!)
+        if let payload = (packet.protocolParser as? UDPProtocolParser)?.payload {
+            socket.write(data: payload)
+        }
     }
 
     fileprivate func findSocket(connectInfo: ConnectInfo?, socket: NWUDPSocket?) -> (ConnectInfo, NWUDPSocket)? {
         var result: (ConnectInfo, NWUDPSocket)?
 
         queue.sync {
-            if connectInfo != nil {
-                guard let sock = self.activeSockets[connectInfo!] else {
+            if let connectInfo = connectInfo {
+                guard let sock = self.activeSockets[connectInfo] else {
                     result = nil
                     return
                 }
-                result = (connectInfo!, sock)
+                result = (connectInfo, sock)
                 return
             }
 
