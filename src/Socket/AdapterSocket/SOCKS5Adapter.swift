@@ -39,7 +39,7 @@ public class SOCKS5Adapter: AdapterSocket {
 
         do {
             internalStatus = .connecting
-            try socket.connectTo(host: serverHost, port: serverPort, enableTLS: false, tlsSettings: nil)
+            try socket?.connectTo(host: serverHost, port: serverPort, enableTLS: false, tlsSettings: nil)
         } catch {}
     }
 

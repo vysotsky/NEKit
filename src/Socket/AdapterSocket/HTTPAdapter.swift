@@ -54,7 +54,7 @@ public class HTTPAdapter: AdapterSocket {
 
         do {
             internalStatus = .connecting
-            try socket.connectTo(host: serverHost, port: serverPort, enableTLS: secured, tlsSettings: nil)
+            try socket?.connectTo(host: serverHost, port: serverPort, enableTLS: secured, tlsSettings: nil)
         } catch {}
     }
 

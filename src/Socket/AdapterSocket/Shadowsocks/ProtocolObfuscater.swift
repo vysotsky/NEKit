@@ -186,7 +186,7 @@ extension ShadowsocksAdapter {
 
             public override func start() {
                 handleStatus0()
-                outputStreamProcessor.socket.readDataTo(length: 129)
+                outputStreamProcessor.socket?.readDataTo(length: 129)
             }
 
             public override func input(data: Data) throws {

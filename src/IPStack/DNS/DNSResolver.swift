@@ -63,7 +63,9 @@ open class UDPDNSResolver: DNSResolverProtocol, NWUDPSocketDelegate {
         if socket == nil {
             createSocket()
         }
-        socket?.write(data: session.requestMessage.payload)
+        if let requestPayload = session.requestMessage.payload {
+            socket?.write(data: requestPayload)
+        }
     }
 
     public func stop() {

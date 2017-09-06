@@ -21,7 +21,7 @@ func == (left: ConnectInfo, right: ConnectInfo) -> Bool {
 /// This stack tranmits UDP packets directly.
 public class UDPDirectStack: IPStackProtocol, NWUDPSocketDelegate {
     fileprivate var activeSockets: [ConnectInfo: NWUDPSocket] = [:]
-    public var outputFunc: (([Data], [NSNumber]) -> Void)!
+    public var outputFunc: (([Data], [NSNumber]) -> Void)?
 
     fileprivate let queue: DispatchQueue = DispatchQueue(label: "NEKit.UDPDirectStack.SocketArrayQueue", attributes: [])
 
@@ -73,7 +73,6 @@ public class UDPDirectStack: IPStackProtocol, NWUDPSocketDelegate {
             return
         }
 
-        // swiftlint:disable:next force_cast
         if let payload = (packet.protocolParser as? UDPProtocolParser)?.payload {
             socket.write(data: payload)
         }
@@ -145,7 +144,7 @@ public class UDPDirectStack: IPStackProtocol, NWUDPSocketDelegate {
         
         packet.buildPacket()
 
-        outputFunc([packet.packetData], [NSNumber(value: AF_INET as Int32)])
+        outputFunc?([packet.packetData], [NSNumber(value: AF_INET as Int32)])
     }
     
     public func didCancel(socket: NWUDPSocket) {

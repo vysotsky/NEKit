@@ -34,7 +34,7 @@ open class AdapterSocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
     // MARK: SocketProtocol Implementation
 
     /// The underlying TCP socket transmitting data.
-    open var socket: RawTCPSocketProtocol!
+    open var socket: RawTCPSocketProtocol?
 
     /// The delegate instance.
     weak open var delegate: SocketDelegate?

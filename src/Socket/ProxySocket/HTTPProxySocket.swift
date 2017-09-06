@@ -77,7 +77,7 @@ public class HTTPProxySocket: ProxySocket {
         }
         
         readStatus = .readingFirstHeader
-        socket.readDataTo(data: Utils.HTTPData.DoubleCRLF)
+        socket?.readDataTo(data: Utils.HTTPData.DoubleCRLF)
     }
     
     override public func readData() {
@@ -99,7 +99,7 @@ public class HTTPProxySocket: ProxySocket {
         
         switch scanner.nextAction {
         case .readContent:
-            socket.readData()
+            socket?.readData()
         default:
             readStatus = .stopped
             disconnect()

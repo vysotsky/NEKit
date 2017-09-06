@@ -21,7 +21,7 @@ extension ShadowsocksAdapter {
         public weak var inputStreamProcessor: StreamObfuscater.StreamObfuscaterBase!
         public weak var outputStreamProcessor: ProtocolObfuscater.ProtocolObfuscaterBase!
 
-        var readIV: Data!
+        var readIV: Data?
         let key: Data
         let algorithm: CryptoAlgorithm
 
@@ -108,14 +108,14 @@ extension ShadowsocksAdapter {
             case .CHACHA20:
                 switch operation {
                 case .decrypt:
-                    return SodiumStreamCrypto(key: key, iv: readIV, algorithm: .chacha20)
+                    return SodiumStreamCrypto(key: key, iv: readIV!, algorithm: .chacha20)
                 case .encrypt:
                     return SodiumStreamCrypto(key: key, iv: writeIV, algorithm: .chacha20)
                 }
             case .SALSA20:
                 switch operation {
                 case .decrypt:
-                    return SodiumStreamCrypto(key: key, iv: readIV, algorithm: .salsa20)
+                    return SodiumStreamCrypto(key: key, iv: readIV!, algorithm: .salsa20)
                 case .encrypt:
                     return SodiumStreamCrypto(key: key, iv: writeIV, algorithm: .salsa20)
                 }
@@ -124,7 +124,7 @@ extension ShadowsocksAdapter {
                 combinedKey.append(key)
                 switch operation {
                 case .decrypt:
-                    combinedKey.append(readIV)
+                    combinedKey.append(readIV!)
                     return CCCrypto(operation: .decrypt, mode: .rc4, algorithm: .rc4, initialVector: nil, key: MD5Hash.final(combinedKey))
                 case .encrypt:
                     combinedKey.append(writeIV)

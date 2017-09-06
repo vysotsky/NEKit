@@ -18,7 +18,7 @@ public class DirectAdapter: AdapterSocket {
         }
 
         do {
-            try socket.connectTo(host: session.host, port: Int(session.port), enableTLS: false, tlsSettings: nil)
+            try socket?.connectTo(host: session.host, port: Int(session.port), enableTLS: false, tlsSettings: nil)
         } catch let error {
             observer?.signal(.errorOccured(error, on: self))
             disconnect()

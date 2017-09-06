@@ -30,7 +30,7 @@ open class ProxySocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
 
         super.init()
 
-        self.socket.delegate = self
+        self.socket?.delegate = self
 
         if observe {
             observer = ObserverFactory.currentFactory?.getObserverForProxySocket(self)
@@ -70,7 +70,7 @@ open class ProxySocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
             return
         }
 
-        socket.readData()
+        socket?.readData()
     }
 
     /**
@@ -84,7 +84,7 @@ open class ProxySocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
             return
         }
 
-        socket.write(data: data)
+        socket?.write(data: data)
     }
 
     /**
@@ -98,7 +98,7 @@ open class ProxySocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
         _status = .disconnecting
         _cancelled = true
         session?.disconnected(becauseOf: error, by: .proxy)
-        socket.disconnect()
+        socket?.disconnect()
         observer?.signal(.disconnectCalled(self))
     }
 
@@ -113,14 +113,14 @@ open class ProxySocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
         _status = .disconnecting
         _cancelled = true
         session?.disconnected(becauseOf: error, by: .proxy)
-        socket.forceDisconnect()
+        socket?.forceDisconnect()
         observer?.signal(.forceDisconnectCalled(self))
     }
 
     // MARK: SocketProtocol Implementation
 
     /// The underlying TCP socket transmitting data.
-    public var socket: RawTCPSocketProtocol!
+    public var socket: RawTCPSocketProtocol?
 
     /// The delegate instance.
     weak public var delegate: SocketDelegate?
