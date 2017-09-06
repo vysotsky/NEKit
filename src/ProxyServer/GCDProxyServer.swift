@@ -5,7 +5,7 @@ import CocoaAsyncSocket
 ///
 /// This shoule be the base class for any concrete implementation of proxy server (e.g., HTTP or SOCKS5) which needs to listen on some port.
 open class GCDProxyServer: ProxyServer, GCDAsyncSocketDelegate {
-    fileprivate var listenSocket: GCDAsyncSocket!
+    fileprivate var listenSocket: GCDAsyncSocket?
 
     /**
      Start the proxy server which creates a GCDAsyncSocket listening on specific port.
@@ -15,7 +15,7 @@ open class GCDProxyServer: ProxyServer, GCDAsyncSocketDelegate {
     override open func start() throws {
         try QueueFactory.executeOnQueueSynchronizedly {
             listenSocket = GCDAsyncSocket(delegate: self, delegateQueue: QueueFactory.getQueue(), socketQueue: QueueFactory.getQueue())
-            try listenSocket.accept(onInterface: address?.presentation, port: port.value)
+            try listenSocket?.accept(onInterface: address?.presentation, port: port.value)
             try super.start()
         }
     }
