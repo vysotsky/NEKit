@@ -23,7 +23,7 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
     fileprivate let pool: IPPool?
     fileprivate var resolvers: [DNSResolverProtocol] = []
 
-    open var outputFunc: (([Data], [NSNumber]) -> Void)!
+    open var outputFunc: (([Data], [NSNumber]) -> Void)?
 
     // Only match A record as of now, all other records should be passed directly.
     fileprivate let matchedType = [DNSType.a]
@@ -201,7 +201,7 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
                     
                     ipPacket.buildPacket()
                     
-                    outputFunc([ipPacket.packetData], [NSNumber(value: AF_INET as Int32)])
+                    outputFunc?([ipPacket.packetData], [NSNumber(value: AF_INET as Int32)])
                 }
             }
         }

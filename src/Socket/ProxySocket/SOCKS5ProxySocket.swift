@@ -62,10 +62,10 @@ public class SOCKS5ProxySocket: ProxySocket {
         }
     }
     /// The remote host to connect to.
-    public var destinationHost: String!
+    public var destinationHost: String?
 
     /// The remote port to connect to.
-    public var destinationPort: Int!
+    public var destinationPort: Int?
 
     private var readStatus: SOCKS5ProxyReadStatus = .invalid
     private var writeStatus: SOCKS5ProxyWriteStatus = .invalid
@@ -89,7 +89,7 @@ public class SOCKS5ProxySocket: ProxySocket {
         }
 
         readStatus = .readingVersionIdentifierAndNumberOfMethods
-        socket.readDataTo(length: 2)
+        socket?.readDataTo(length: 2)
     }
 
     // swiftlint:disable function_body_length
@@ -121,7 +121,7 @@ public class SOCKS5ProxySocket: ProxySocket {
                 }
 
                 self.readStatus = .readingMethods
-                self.socket.readDataTo(length: Int(pointer.successor().pointee))
+                self.socket?.readDataTo(length: Int(pointer.successor().pointee))
             }
         case .readingMethods:
             // TODO: check for 0x00 in read data
@@ -130,7 +130,7 @@ public class SOCKS5ProxySocket: ProxySocket {
             // we would not be able to read anything before the data is written out, so no need to handle the dataWrote event.
             write(data: response)
             readStatus = .readingConnectHeader
-            socket.readDataTo(length: 4)
+            socket?.readDataTo(length: 4)
         case .readingConnectHeader:
             data.withUnsafeBytes { (pointer: UnsafePointer<UInt8>) in
                 guard pointer.pointee == 5 && pointer.successor().pointee == 1 else {
@@ -141,13 +141,13 @@ public class SOCKS5ProxySocket: ProxySocket {
                 switch pointer.advanced(by: 3).pointee {
                 case 1:
                     readStatus = .readingIPv4Address
-                    socket.readDataTo(length: 4)
+                    socket?.readDataTo(length: 4)
                 case 3:
                     readStatus = .readingDomainLength
-                    socket.readDataTo(length: 1)
+                    socket?.readDataTo(length: 1)
                 case 4:
                     readStatus = .readingIPv6Address
-                    socket.readDataTo(length: 16)
+                    socket?.readDataTo(length: 16)
                 default:
                     break
                 }
@@ -165,7 +165,7 @@ public class SOCKS5ProxySocket: ProxySocket {
             }
 
             readStatus = .readingPort
-            socket.readDataTo(length: 2)
+            socket?.readDataTo(length: 2)
         case .readingIPv6Address:
             var address = Data(count: Int(INET6_ADDRSTRLEN))
             _ = data.withUnsafeRawPointer { data_ptr in
@@ -179,25 +179,28 @@ public class SOCKS5ProxySocket: ProxySocket {
             }
 
             readStatus = .readingPort
-            socket.readDataTo(length: 2)
+            socket?.readDataTo(length: 2)
         case .readingDomainLength:
             data.withUnsafeRawPointer {
                 readStatus = .readingDomain
-                socket.readDataTo(length: Int($0.load(as: UInt8.self)))
+                socket?.readDataTo(length: Int($0.load(as: UInt8.self)))
             }
         case .readingDomain:
             destinationHost = String(data: data, encoding: .utf8)
             readStatus = .readingPort
-            socket.readDataTo(length: 2)
+            socket?.readDataTo(length: 2)
         case .readingPort:
             data.withUnsafeRawPointer {
                 destinationPort = Int($0.load(as: UInt16.self).bigEndian)
             }
 
             readStatus = .forwarding
-            session = ConnectSession(host: destinationHost, port: destinationPort)
-            observer?.signal(.receivedRequest(session!, on: self))
-            delegate?.didReceive(session: session!, from: self)
+            if let destinationHost = destinationHost,
+                let destinationPort = destinationPort, let session = ConnectSession(host: destinationHost, port: destinationPort) {
+                self.session = session
+                observer?.signal(.receivedRequest(session, on: self))
+                delegate?.didReceive(session: session, from: self)
+            }
         default:
             return
         }

@@ -54,14 +54,14 @@ public class HTTPAdapter: AdapterSocket {
 
         do {
             internalStatus = .connecting
-            try socket.connectTo(host: serverHost, port: serverPort, enableTLS: secured, tlsSettings: nil)
+            try socket?.connectTo(host: serverHost, port: serverPort, enableTLS: secured, tlsSettings: nil)
         } catch {}
     }
 
     override public func didConnectWith(socket: RawTCPSocketProtocol) {
         super.didConnectWith(socket: socket)
 
-        guard let url = URL(string: "\(session.host):\(session.port)") else {
+        guard let session = session, let url = URL(string: "\(session.host):\(session.port)") else {
             observer?.signal(.errorOccured(HTTPAdapterError.invalidURL, on: self))
             disconnect()
             return

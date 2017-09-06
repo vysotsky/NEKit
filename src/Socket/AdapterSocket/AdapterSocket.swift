@@ -1,12 +1,12 @@
 import Foundation
 
 open class AdapterSocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
-    open var session: ConnectSession!
+    open var session: ConnectSession?
     
     open var observer: Observer<AdapterSocketEvent>?
 
     open override var description: String {
-        return "<\(typeName) host:\(session.host) port:\(session.port))>"
+        return "<\(typeName) host:\(String(describing: session?.host)) port:\(String(describing: session?.port)))>"
     }
 
     internal var _cancelled = false
@@ -34,7 +34,7 @@ open class AdapterSocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
     // MARK: SocketProtocol Implementation
 
     /// The underlying TCP socket transmitting data.
-    open var socket: RawTCPSocketProtocol!
+    open var socket: RawTCPSocketProtocol?
 
     /// The delegate instance.
     weak open var delegate: SocketDelegate?
@@ -90,7 +90,7 @@ open class AdapterSocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
     open func disconnect(becauseOf error: Error? = nil) {
         _status = .disconnecting
         _cancelled = true
-        session.disconnected(becauseOf: error, by: .adapter)
+        session?.disconnected(becauseOf: error, by: .adapter)
         observer?.signal(.disconnectCalled(self))
         socket?.disconnect()
     }
@@ -101,7 +101,7 @@ open class AdapterSocket: NSObject, SocketProtocol, RawTCPSocketDelegate {
     open func forceDisconnect(becauseOf error: Error? = nil) {
         _status = .disconnecting
         _cancelled = true
-        session.disconnected(becauseOf: error, by: .adapter)
+        session?.disconnected(becauseOf: error, by: .adapter)
         observer?.signal(.forceDisconnectCalled(self))
         socket?.forceDisconnect()
     }

@@ -60,7 +60,7 @@ public class DirectProxySocket: ProxySocket {
             return
         }
         
-        if let address = socket.destinationIPAddress, let port = socket.destinationPort {
+        if let address = socket?.destinationIPAddress, let port = socket?.destinationPort {
             session = ConnectSession(host: address.presentation, port: Int(port.value))
             
             if let session = self.session {

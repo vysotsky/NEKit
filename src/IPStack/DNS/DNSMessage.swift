@@ -18,7 +18,7 @@ open class DNSMessage {
     open var nameservers: [DNSResource] = []
     open var addtionals: [DNSResource] = []
 
-    var payload: Data!
+    var payload: Data?
 
     var bytesLength: Int {
         var len = 12 + queries.reduce(0) {
@@ -167,7 +167,7 @@ open class DNSMessage {
     func setPayloadWithUInt8(_ value: UInt8, at: Int) {
         var v = value
         withUnsafeBytes(of: &v) {
-            payload.replaceSubrange(at..<at+1, with: $0)
+            payload?.replaceSubrange(at..<at+1, with: $0)
         }
     }
 
@@ -179,7 +179,7 @@ open class DNSMessage {
             v = value
         }
         withUnsafeBytes(of: &v) {
-            payload.replaceSubrange(at..<at+2, with: $0)
+            payload?.replaceSubrange(at..<at+2, with: $0)
         }
     }
 
@@ -191,20 +191,20 @@ open class DNSMessage {
             v = value
         }
         withUnsafeBytes(of: &v) {
-            payload.replaceSubrange(at..<at+4, with: $0)
+            payload?.replaceSubrange(at..<at+4, with: $0)
         }
     }
 
     func setPayloadWithData(_ data: Data, at: Int, length: Int? = nil, from: Int = 0) {
         let length = length ?? data.count - from
 
-        payload.withUnsafeMutableBytes {
+        payload?.withUnsafeMutableBytes {
             data.copyBytes(to: $0+at, from: from..<from+length)
         }
     }
 
     func resetPayloadAt(_ at: Int, length: Int) {
-        payload.resetBytes(in: at..<at+length)
+        payload?.resetBytes(in: at..<at+length)
     }
 
     fileprivate func writeAllRecordAt(_ at: Int) -> Bool {

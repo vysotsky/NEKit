@@ -162,16 +162,16 @@ open class IPPacket {
     var TTL: UInt8 = 64
 
     /// Source IP address.
-    var sourceAddress: IPAddress!
+    var sourceAddress: IPAddress
 
     /// Destination IP address.
-    var destinationAddress: IPAddress!
+    var destinationAddress: IPAddress
 
     /// Transport protocol of the packet.
-    var transportProtocol: TransportProtocol!
+    var transportProtocol: TransportProtocol
 
     /// Parser to parse the payload in IP packet.
-    var protocolParser: TransportProtocolParserProtocol!
+    var protocolParser: TransportProtocolParserProtocol
 
     /// The data representing the packet.
     var packetData: Data
@@ -213,7 +213,7 @@ open class IPPacket {
             tos = try scanner.readByte()
             
             let twoBytes = try scanner.read16()
-            guard totalLength == twoBytes else {
+            guard UInt16(packetData.count) == twoBytes else {
                 DDLogError("Packet length mismatches from header.")
                 return nil
             }
@@ -241,11 +241,6 @@ open class IPPacket {
                 return nil
             }
             
-            guard let transportProtocol = transportProtocol else {
-                DDLogError("No transportProtocol provided")
-                return nil
-            }
-            
             switch transportProtocol {
             case .udp:
                 guard let parser = UDPProtocolParser(packetData: packetData, offset: Int(headerLength)) else {
@@ -253,7 +248,7 @@ open class IPPacket {
                 }
                 self.protocolParser = parser
             default:
-                DDLogError("Can not parse packet header of type \(transportProtocol) yet")
+                DDLogError("Can not parse packet header of this type yet")
                 return nil
             }
         } catch _ {
@@ -263,10 +258,10 @@ open class IPPacket {
 
     func computePseudoHeaderChecksum() -> UInt32 {
         var result: UInt32 = 0
-        if let address = sourceAddress, let inNetworkOrder = address.UInt32InNetworkOrder {
+        if let inNetworkOrder = sourceAddress.UInt32InNetworkOrder {
             result += inNetworkOrder >> 16 + inNetworkOrder & 0xFFFF
         }
-        if let address = destinationAddress, let inNetworkOrder = address.UInt32InNetworkOrder  {
+        if let inNetworkOrder = sourceAddress.UInt32InNetworkOrder  {
             result += inNetworkOrder >> 16 + inNetworkOrder & 0xFFFF
         }
         result += UInt32(transportProtocol.rawValue) << 8
@@ -275,7 +270,7 @@ open class IPPacket {
     }
 
     func buildPacket() {
-        packetData = NSMutableData(length: Int(headerLength) + protocolParser.bytesLength) as Data!
+        packetData = NSMutableData(length: Int(headerLength) + protocolParser.bytesLength)! as Data
 
         // set header
         setPayloadWithUInt8(headerLength / 4 + version.rawValue << 4, at: 0)
@@ -298,7 +293,10 @@ open class IPPacket {
         protocolParser.packetData = packetData
         protocolParser.offset = Int(headerLength)
         protocolParser.buildSegment(computePseudoHeaderChecksum())
-        packetData = protocolParser.packetData
+        
+        if let protocolPacketData = protocolParser.packetData {
+            packetData = protocolPacketData
+        }
 
         setPayloadWithUInt16(Checksum.computeChecksum(packetData, from: 0, to: Int(headerLength)), at: 10, swap: false)
     }

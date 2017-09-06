@@ -31,7 +31,7 @@ public enum SocketStatus {
 /// Any concrete implementation does not need to be thread-safe.
 public protocol SocketProtocol: class {
     /// The underlying TCP socket transmitting data.
-    var socket: RawTCPSocketProtocol! { get }
+    var socket: RawTCPSocketProtocol? { get }
 
     /// The delegate instance.
     weak var delegate: SocketDelegate? { get set }
