@@ -48,10 +48,7 @@ func trim(_ s: String) -> String {
 }
 
 func trim(_ s: String?) -> String? {
-    if let s = s as String {
-        return trim(s)
-    }
-    return nil
+    return (s == nil) ? nil : (trim(s!) as String)
 }
 
 func reportError(message: String) -> Never {

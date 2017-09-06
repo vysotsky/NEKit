@@ -177,7 +177,10 @@ open class DNSServer: DNSResolverDelegate, IPStackProtocol {
                 response.messageType = .response
                 response.recursionAvailable = true
                 // since we only support ipv4 as of now, it must be an answer of type A
-                response.answers.append(DNSResource.ARecord(session.requestMessage.queries[0].name, TTL: UInt32(Opt.DNSFakeIPTTL), address: session.fakeIP!))
+                if let name = session.requestMessage.queries.first?.name,
+                    let address = session.fakeIP {
+                    response.answers.append(DNSResource.ARecord(name, TTL: UInt32(Opt.DNSFakeIPTTL), address: address))
+                }
                 session.expireAt = Date().addingTimeInterval(Double(Opt.DNSFakeIPTTL))
                 guard response.buildMessage() else {
                     DDLogError("Failed to build DNS response.")

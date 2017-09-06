@@ -196,13 +196,10 @@ open class DNSMessage {
     }
 
     func setPayloadWithData(_ data: Data, at: Int, length: Int? = nil, from: Int = 0) {
-        var length = length
-        if length == nil {
-            length = data.count - from
-        }
+        let length = length ?? data.count - from
 
         payload.withUnsafeMutableBytes {
-            data.copyBytes(to: $0+at, from: from..<from+length!)
+            data.copyBytes(to: $0+at, from: from..<from+length)
         }
     }
 
