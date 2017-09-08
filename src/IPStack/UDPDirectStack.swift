@@ -73,7 +73,6 @@ public class UDPDirectStack: IPStackProtocol, NWUDPSocketDelegate {
             return
         }
 
-        // swiftlint:disable:next force_cast
         if let payload = (packet.protocolParser as? UDPProtocolParser)?.payload {
             socket.write(data: payload)
         }
